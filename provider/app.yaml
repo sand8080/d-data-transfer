@@ -1,0 +1,8 @@
+runtime: go
+api_version: go1
+
+service: provider
+
+handlers:
+- url: /add-cron-task
+  script: _go_app
