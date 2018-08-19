@@ -1,0 +1,3 @@
+dispatch:
+  - url: "*/add-cron-task"
+    service: provider
