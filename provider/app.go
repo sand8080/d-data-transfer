@@ -17,5 +17,5 @@ func main() {
 func addCronTask(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 	log.Debugf(c, "Scheduling new cron task")
-	fmt.Fprintln(w, "Hello, world!")
+	fmt.Fprintln(w, "Cron task scheduled")
 }
