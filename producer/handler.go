@@ -1,8 +1,8 @@
 package main
 
 import (
-	"net/http"
 	"fmt"
+	"net/http"
 
 	"cloud.google.com/go/pubsub"
 	"google.golang.org/appengine"
