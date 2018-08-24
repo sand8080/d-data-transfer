@@ -1,0 +1,12 @@
+runtime: go
+env: flex
+
+service: consumer
+
+automatic_scaling:
+  min_num_instances: 1
+
+env_variables:
+  GOOGLE_CLOUD_PROJECT: delacon-dt-dev
+  PUBSUB_TOPIC: data-transfer
+  PUBSUB_SUBS: data-transfer-subs

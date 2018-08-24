@@ -1,0 +1,13 @@
+runtime: go
+api_version: go1
+
+service: producer
+
+handlers:
+- url: /add-cron-task
+  script: _go_app
+
+env_variables:
+  GOOGLE_CLOUD_PROJECT: delacon-dt-dev
+  PUBSUB_TOPIC: data-transfer
+  PUBSUB_SUBS: data-transfer-subs
