@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"cloud.google.com/go/pubsub"
 	"golang.org/x/net/context"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func mustGetenv(k string) string {
@@ -51,4 +54,23 @@ func createTopic(c *pubsub.Client) *pubsub.Topic {
 		os.Exit(1)
 	}
 	return t
+}
+
+func createSubs(client *pubsub.Client, subName string, topic *pubsub.Topic) error {
+	ctx := context.Background()
+	sub, err := client.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{
+		Topic:       topic,
+		AckDeadline: 20 * time.Second,
+	})
+	fmt.Printf("Subscription creation err: %v", err)
+	s, ok := status.FromError(err)
+	if !ok || s.Code() != codes.AlreadyExists {
+		if err != nil {
+			fmt.Printf("Subscrbtion creation failed: %v", err)
+			os.Exit(1)
+		}
+		return err
+	}
+	fmt.Printf("Created subscription: %v\n", sub)
+	return nil
 }
