@@ -12,8 +12,9 @@ import (
 func main() {
 	client := newPubSubClient()
 	topic := createTopic(client)
-
-	if err := pullMsgs(client, mustGetenv("PUBSUB_SUBS"), topic); err != nil {
+	sub := mustGetenv("PUBSUB_SUBS")
+	createSubs(client, sub, topic)
+	if err := pullMsgs(client, sub, topic); err != nil {
 		log.Fatal(err)
 	}
 }
