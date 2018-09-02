@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 	"cloud.google.com/go/pubsub"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -14,63 +16,59 @@ import (
 func mustGetenv(k string) string {
 	v := os.Getenv(k)
 	if v == "" {
-		fmt.Printf("%s environment variable not set.", k)
 		os.Exit(1)
 	}
 	return v
 }
 
-func newPubSubClient() *pubsub.Client {
+func newPubSubClient(ctx context.Context) (*pubsub.Client, error) {
 	project := mustGetenv("GOOGLE_CLOUD_PROJECT")
-
-	ctx := context.Background()
-	client, err := pubsub.NewClient(ctx, project)
-	if err != nil {
-		fmt.Printf("Could not create pubsub Client: %v", err)
-		os.Exit(1)
-	}
-
-	return client
+	return pubsub.NewClient(ctx, project)
 }
 
-func createTopic(c *pubsub.Client) *pubsub.Topic {
-	ctx := context.Background()
+func getTopic(cli *pubsub.Client) *pubsub.Topic {
+	topic := mustGetenv("PUBSUB_TOPIC")
+	return cli.Topic(topic)
+}
+
+func createTopic(ctx context.Context, cli *pubsub.Client) (*pubsub.Topic, error) {
 	topic := mustGetenv("PUBSUB_TOPIC")
 
 	// Create a topic to subscribe to.
-	t := c.Topic(topic)
+	t := cli.Topic(topic)
 	ok, err := t.Exists(ctx)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return nil, err
 	}
 	if ok {
-		return t
+		return t, nil
 	}
 
-	t, err = c.CreateTopic(ctx, topic)
-	if err != nil {
-		fmt.Printf("Failed to create the topic: %v", err)
-		os.Exit(1)
-	}
-	return t
+	return cli.CreateTopic(ctx, topic)
 }
 
-func createSubs(client *pubsub.Client, subName string, topic *pubsub.Topic) error {
-	ctx := context.Background()
-	sub, err := client.CreateSubscription(ctx, subName, pubsub.SubscriptionConfig{
+func getPushEndpoint(ctx context.Context) string {
+	log.Debugf(ctx, "Checking if in dev environment")
+	if appengine.IsDevAppServer() {
+		return "http://localhost:8080/push"
+	} else {
+		return fmt.Sprintf("https://%s.appspot.com/push", mustGetenv("GOOGLE_CLOUD_PROJECT"))
+	}
+}
+
+func createSubs(ctx context.Context, cli *pubsub.Client, topic *pubsub.Topic, name string) (*pubsub.Subscription, error) {
+	pushCfg := pubsub.PushConfig{Endpoint: getPushEndpoint(ctx)}
+	sub, err := cli.CreateSubscription(ctx, name, pubsub.SubscriptionConfig{
 		Topic:       topic,
+		PushConfig:  pushCfg,
 		AckDeadline: 20 * time.Second,
 	})
-	fmt.Printf("Subscription creation err: %v", err)
 	s, ok := status.FromError(err)
 	if !ok || s.Code() != codes.AlreadyExists {
 		if err != nil {
-			fmt.Printf("Subscrbtion creation failed: %v", err)
-			os.Exit(1)
+			log.Errorf(ctx, "Subscrbtion creation failed: %v", err)
+			return nil, err
 		}
-		return err
 	}
-	fmt.Printf("Created subscription: %v\n", sub)
-	return nil
+	return sub, nil
 }

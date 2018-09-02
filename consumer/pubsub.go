@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"time"
 
 	"cloud.google.com/go/pubsub"
 	"golang.org/x/net/context"
+	"google.golang.org/appengine/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -14,7 +14,7 @@ import (
 func mustGetenv(k string) string {
 	v := os.Getenv(k)
 	if v == "" {
-		fmt.Printf("%s environment variable not set.", k)
+		log.Debugf(context.Background(), "%s environment variable not set.", k)
 		os.Exit(1)
 	}
 	return v
@@ -22,11 +22,10 @@ func mustGetenv(k string) string {
 
 func newPubSubClient() *pubsub.Client {
 	project := mustGetenv("GOOGLE_CLOUD_PROJECT")
-
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, project)
 	if err != nil {
-		fmt.Printf("Could not create pubsub Client: %v", err)
+		log.Debugf(ctx, "Could not create pubsub Client: %v", err)
 		os.Exit(1)
 	}
 
@@ -41,7 +40,7 @@ func createTopic(c *pubsub.Client) *pubsub.Topic {
 	t := c.Topic(topic)
 	ok, err := t.Exists(ctx)
 	if err != nil {
-		fmt.Println(err)
+		log.Errorf(ctx, "Topic cration error: %v", err)
 		os.Exit(1)
 	}
 	if ok {
@@ -50,7 +49,7 @@ func createTopic(c *pubsub.Client) *pubsub.Topic {
 
 	t, err = c.CreateTopic(ctx, topic)
 	if err != nil {
-		fmt.Printf("Failed to create the topic: %v", err)
+		log.Errorf(ctx, "Failed to create the topic: %v", err)
 		os.Exit(1)
 	}
 	return t
@@ -62,15 +61,14 @@ func createSubs(client *pubsub.Client, subName string, topic *pubsub.Topic) erro
 		Topic:       topic,
 		AckDeadline: 20 * time.Second,
 	})
-	fmt.Printf("Subscription creation err: %v", err)
 	s, ok := status.FromError(err)
 	if !ok || s.Code() != codes.AlreadyExists {
 		if err != nil {
-			fmt.Printf("Subscrbtion creation failed: %v", err)
+			log.Errorf(ctx, "Subscrbtion creation failed: %v", err)
 			os.Exit(1)
 		}
 		return err
 	}
-	fmt.Printf("Created subscription: %v\n", sub)
+	log.Debugf(ctx, "Created subscription: %v\n", sub)
 	return nil
 }

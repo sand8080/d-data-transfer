@@ -2,11 +2,10 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"sync"
 
 	"cloud.google.com/go/pubsub"
+	"google.golang.org/appengine/log"
 )
 
 func main() {
@@ -14,8 +13,10 @@ func main() {
 	topic := createTopic(client)
 	sub := mustGetenv("PUBSUB_SUBS")
 	createSubs(client, sub, topic)
+
+	ctx := context.Background()
 	if err := pullMsgs(client, sub, topic); err != nil {
-		log.Fatal(err)
+		log.Debugf(ctx, "Pull messages failed: %v", err)
 	}
 }
 
@@ -26,7 +27,7 @@ func pullMsgs(client *pubsub.Client, subName string, topic *pubsub.Topic) error 
 	sub := client.Subscription(subName)
 	err := sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		msg.Ack()
-		fmt.Printf("Got message: %q\n", string(msg.Data))
+		log.Debugf(ctx, "Got message: %q\n", string(msg.Data))
 		mu.Lock()
 		defer mu.Unlock()
 		received++
