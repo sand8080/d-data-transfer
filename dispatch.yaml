@@ -1,5 +1,5 @@
 dispatch:
-  - url: "*/add-cron-task"
+  - url: "*/publish"
     service: producer
   - url: "*/push"
     service: producer
