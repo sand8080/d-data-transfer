@@ -1,38 +1,30 @@
-package main
+package queue
 
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
+	"cloud.google.com/go/pubsub"
+	"github.com/sand8080/d-data-transfer/env"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
-	"cloud.google.com/go/pubsub"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func mustGetenv(k string) string {
-	v := os.Getenv(k)
-	if v == "" {
-		os.Exit(1)
-	}
-	return v
-}
-
-func newPubSubClient(ctx context.Context) (*pubsub.Client, error) {
-	project := mustGetenv("GOOGLE_CLOUD_PROJECT")
+func NewPubSubClient(ctx context.Context) (*pubsub.Client, error) {
+	project := env.MustGetenv("GOOGLE_CLOUD_PROJECT")
 	return pubsub.NewClient(ctx, project)
 }
 
-func getTopic(cli *pubsub.Client) *pubsub.Topic {
-	topic := mustGetenv("PUBSUB_TOPIC")
+func GetTopic(cli *pubsub.Client) *pubsub.Topic {
+	topic := env.MustGetenv("PUBSUB_TOPIC")
 	return cli.Topic(topic)
 }
 
-func createTopic(ctx context.Context, cli *pubsub.Client) (*pubsub.Topic, error) {
-	topic := mustGetenv("PUBSUB_TOPIC")
+func CreateTopic(ctx context.Context, cli *pubsub.Client) (*pubsub.Topic, error) {
+	topic := env.MustGetenv("PUBSUB_TOPIC")
 
 	// Create a topic to subscribe to.
 	t := cli.Topic(topic)
@@ -52,11 +44,11 @@ func getPushEndpoint(ctx context.Context) string {
 	if appengine.IsDevAppServer() {
 		return "http://localhost:8080/push"
 	} else {
-		return fmt.Sprintf("https://%s.appspot.com/push", mustGetenv("GOOGLE_CLOUD_PROJECT"))
+		return fmt.Sprintf("https://%s.appspot.com/push", env.MustGetenv("GOOGLE_CLOUD_PROJECT"))
 	}
 }
 
-func createSubs(ctx context.Context, cli *pubsub.Client, topic *pubsub.Topic, name string) (*pubsub.Subscription, error) {
+func CreateSubs(ctx context.Context, cli *pubsub.Client, topic *pubsub.Topic, name string) (*pubsub.Subscription, error) {
 	pushCfg := pubsub.PushConfig{Endpoint: getPushEndpoint(ctx)}
 	sub, err := cli.CreateSubscription(ctx, name, pubsub.SubscriptionConfig{
 		Topic:       topic,

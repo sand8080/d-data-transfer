@@ -7,9 +7,7 @@ import (
 )
 
 func main() {
-	h := handler{}
-	http.HandleFunc("/init", h.init)
-	http.HandleFunc("/publish", h.publish)
-	http.HandleFunc("/push", h.push)
+	http.HandleFunc("/init", initQueue)
+	http.HandleFunc("/publish", publish)
 	appengine.Main()
 }

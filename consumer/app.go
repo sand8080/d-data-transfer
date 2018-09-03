@@ -2,22 +2,17 @@ package main
 
 import (
 	"context"
+	"net/http"
 	"sync"
 
 	"cloud.google.com/go/pubsub"
+	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 )
 
 func main() {
-	client := newPubSubClient()
-	topic := createTopic(client)
-	sub := mustGetenv("PUBSUB_SUBS")
-	createSubs(client, sub, topic)
-
-	ctx := context.Background()
-	if err := pullMsgs(client, sub, topic); err != nil {
-		log.Debugf(ctx, "Pull messages failed: %v", err)
-	}
+	http.HandleFunc("/push", push)
+	appengine.Main()
 }
 
 func pullMsgs(client *pubsub.Client, subName string, topic *pubsub.Topic) error {
