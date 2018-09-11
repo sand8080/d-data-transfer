@@ -1,4 +1,1 @@
 cron:
-  - description: "Uploading data cron job"
-    url: /publish
-    schedule: every 60 mins
