@@ -2,21 +2,17 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log"
+	"net/http"
 	"sync"
 
 	"cloud.google.com/go/pubsub"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 )
 
 func main() {
-	client := newPubSubClient()
-	topic := createTopic(client)
-	sub := mustGetenv("PUBSUB_SUBS")
-	createSubs(client, sub, topic)
-	if err := pullMsgs(client, sub, topic); err != nil {
-		log.Fatal(err)
-	}
+	http.HandleFunc("/push", push)
+	appengine.Main()
 }
 
 func pullMsgs(client *pubsub.Client, subName string, topic *pubsub.Topic) error {
@@ -26,7 +22,7 @@ func pullMsgs(client *pubsub.Client, subName string, topic *pubsub.Topic) error 
 	sub := client.Subscription(subName)
 	err := sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		msg.Ack()
-		fmt.Printf("Got message: %q\n", string(msg.Data))
+		log.Debugf(ctx, "Got message: %q\n", string(msg.Data))
 		mu.Lock()
 		defer mu.Unlock()
 		received++

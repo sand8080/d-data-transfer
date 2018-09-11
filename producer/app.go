@@ -7,11 +7,7 @@ import (
 )
 
 func main() {
-	client := newPubSubClient()
-	topic := createTopic(client)
-	createSubs(client, mustGetenv("PUBSUB_SUBS"), topic)
-	h := handler{topic: topic}
-
-	http.HandleFunc("/add-cron-task", h.addCronTask)
+	http.HandleFunc("/init", initQueue)
+	http.HandleFunc("/publish", publish)
 	appengine.Main()
 }

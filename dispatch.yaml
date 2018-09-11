@@ -1,3 +1,5 @@
 dispatch:
-  - url: "*/add-cron-task"
-    service: provider
+  - url: "*/publish"
+    service: producer
+  - url: "*/push"
+    service: consumer

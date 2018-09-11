@@ -1,17 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
-	"fmt"
 	"google.golang.org/appengine"
 )
 
 func main() {
-	http.HandleFunc("/", addCronTask)
+	http.HandleFunc("/", root)
 	appengine.Main()
 }
 
-func addCronTask(w http.ResponseWriter, r *http.Request) {
+func root(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Default service app stub")
 }

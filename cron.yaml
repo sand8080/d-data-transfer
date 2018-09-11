@@ -1,4 +1,1 @@
 cron:
-  - description: "Uploading data cron job"
-    url: /add-cron-task
-    schedule: every 60 mins

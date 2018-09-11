@@ -1,10 +1,11 @@
 runtime: go
-env: flex
+api_version: go1
 
 service: consumer
 
-automatic_scaling:
-  min_num_instances: 1
+handlers:
+- url: /push
+  script: _go_app
 
 env_variables:
   GOOGLE_CLOUD_PROJECT: delacon-dt-dev
