@@ -14,8 +14,7 @@ import (
 )
 
 func NewPubSubClient(ctx context.Context) (*pubsub.Client, error) {
-	project := env.MustGetenv("GOOGLE_CLOUD_PROJECT")
-	return pubsub.NewClient(ctx, project)
+	return pubsub.NewClient(ctx, env.Project())
 }
 
 func GetTopic(cli *pubsub.Client) *pubsub.Topic {
