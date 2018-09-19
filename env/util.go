@@ -9,3 +9,15 @@ func MustGetenv(k string) string {
 	}
 	return v
 }
+
+func Project() string {
+	return MustGetenv("GOOGLE_CLOUD_PROJECT")
+}
+
+func Dataset() string {
+	return MustGetenv("DATASET_ID")
+}
+
+func EventsTable() string {
+	return MustGetenv("EVENTS_TABLE_ID")
+}
