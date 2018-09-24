@@ -5,7 +5,6 @@ import "cloud.google.com/go/bigquery"
 type Event struct {
 	ID     string
 	Source string
-	Created Datetime
 }
 
 // Save implements the ValueSaver interface.

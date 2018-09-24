@@ -21,3 +21,11 @@ func Dataset() string {
 func EventsTable() string {
 	return MustGetenv("EVENTS_TABLE_ID")
 }
+
+func DataSourceUrl() string {
+	return MustGetenv("DATA_SOURCE_URL")
+}
+
+func DataSourceAuthKey() string {
+	return MustGetenv("DATA_SOURCE_AUTH_KEY")
+}

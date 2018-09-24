@@ -65,4 +65,3 @@ func initDataset(w http.ResponseWriter, r *http.Request) {
 	log.Debugf(ctx, "Dataset initialized")
 	fmt.Fprintf(w, "Dataset initialized")
 }
-
