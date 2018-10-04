@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"cloud.google.com/go/pubsub"
-	"github.com/sand8080/d-data-transfer/env"
-	"github.com/sand8080/d-data-transfer/queue"
+	"github.com/sand8080/d-data-transfer/internal/env"
+	"github.com/sand8080/d-data-transfer/internal/queue"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 )

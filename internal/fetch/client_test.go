@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sand8080/d-data-transfer/env"
+	"github.com/sand8080/d-data-transfer/internal/env"
 )
 
 func TestNewClient(t *testing.T) {

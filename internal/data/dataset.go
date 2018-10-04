@@ -5,7 +5,7 @@ import (
 
 	"cloud.google.com/go/bigquery"
 
-	"github.com/sand8080/d-data-transfer/env"
+	"github.com/sand8080/d-data-transfer/internal/env"
 )
 
 func NewBQClient(ctx context.Context) (*bigquery.Client, error) {

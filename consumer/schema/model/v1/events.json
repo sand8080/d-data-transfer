@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "array",
+  "minItems": 0,
+  "items": {
+    "type": "object",
+    "properties": {
+      "uid": {
+        "type": "string"
+      }
+    },
+    "required": ["uid"],
+    "additionalProperties": false
+  }
+}
