@@ -3,14 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/sand8080/d-data-transfer/env"
 	"net/http"
 
 	"cloud.google.com/go/pubsub"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 
-	"github.com/sand8080/d-data-transfer/data"
+	"github.com/sand8080/d-data-transfer/internal/data"
+	"github.com/sand8080/d-data-transfer/internal/env"
 )
 
 type pushRequest struct {

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/pubsub"
-	"github.com/sand8080/d-data-transfer/env"
+	"github.com/sand8080/d-data-transfer/internal/env"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 	"google.golang.org/grpc/codes"

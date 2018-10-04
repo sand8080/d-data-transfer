@@ -29,8 +29,8 @@ func NewClient(url, authKey string) *Client {
 func (c Client) GetReports(from, to time.Time) ([]byte, error) {
 
 	form := url.Values{
-		"datefrom": {from.Format("2006-01-02")},
-		"dateto":   {to.Format("2006-01-02")},
+		"datefrom":     {from.Format("2006-01-02")},
+		"dateto":       {to.Format("2006-01-02")},
 		"reportoption": {"csv"},
 	}
 
