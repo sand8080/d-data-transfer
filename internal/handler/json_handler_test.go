@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -52,8 +53,8 @@ func prepareSchemaProvider(t *testing.T, url string) *validator.SchemaProvider {
 func TestJSONHandler_Handle(t *testing.T) {
 	url := "/do"
 	p := prepareSchemaProvider(t, url)
-	proc := func(data []byte) Response {
-		return Response{Code: http.StatusOK, Status: StatusOK, Result: "ok"}
+	proc := func(data []byte) *Response {
+		return &Response{Code: http.StatusOK, Status: StatusOK, Result: string(data)}
 	}
 	h, err := NewJSONHandler(url, p, proc)
 	assert.NoError(t, err)
@@ -62,9 +63,12 @@ func TestJSONHandler_Handle(t *testing.T) {
 		reqData   []byte
 		expCode   int
 		expStatus string
+		expError  string
 	}{
-		{[]byte(`{"uid": "DtM56"}`), http.StatusOK, StatusOK},
-		{[]byte(`{"uid": 42}`), http.StatusBadRequest, StatusError},
+		{[]byte(`{"uid": "DtM56"}`), http.StatusOK, StatusOK, ""},
+		{[]byte(`{"uid": 42}`), http.StatusBadRequest, StatusError,
+			"uid: Invalid type. Expected: string, given: integer"},
+		{[]byte(``), http.StatusBadRequest, StatusError, "empty request"},
 	}
 	for _, c := range cases {
 		w := httptest.NewRecorder()
@@ -85,6 +89,8 @@ func TestJSONHandler_Handle(t *testing.T) {
 		} else {
 			assert.NotNil(t, r.Error)
 			assert.Nil(t, r.Result)
+			assert.Equal(t, c.expError, r.Error)
 		}
+		fmt.Printf("Response: %v\n", r)
 	}
 }

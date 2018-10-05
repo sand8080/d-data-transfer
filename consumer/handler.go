@@ -3,7 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	stdlog "log"
 	"net/http"
+	"os"
+	"path"
 
 	"cloud.google.com/go/pubsub"
 	"google.golang.org/appengine"
@@ -11,6 +14,8 @@ import (
 
 	"github.com/sand8080/d-data-transfer/internal/data"
 	"github.com/sand8080/d-data-transfer/internal/env"
+	"github.com/sand8080/d-data-transfer/internal/handler"
+	"github.com/sand8080/d-data-transfer/internal/validator"
 )
 
 type pushRequest struct {
@@ -34,7 +39,7 @@ func push(w http.ResponseWriter, r *http.Request) {
 
 	u := cli.Dataset(env.Dataset()).Table(env.EventsTable()).Uploader()
 	events := []data.Event{
-		{ID: "unknown", Source: "push"},
+		{UID: "unknown", IncomingCallNumber: "push"},
 	}
 	err = u.Put(ctx, events)
 	if err != nil {
@@ -64,4 +69,21 @@ func initDataset(w http.ResponseWriter, r *http.Request) {
 
 	log.Debugf(ctx, "Dataset initialized")
 	fmt.Fprintf(w, "Dataset initialized")
+}
+
+func AddEventsHandler(url string, sp *validator.SchemaProvider) *handler.JSONHandler {
+	stdlog.Println("Adding events handler")
+	cwd, _ := os.Getwd()
+	schemaPath := path.Join(cwd, "schema/api/v1/events/add/request.json")
+	stdlog.Printf("Loading schema from: %v\n", schemaPath)
+	err := sp.Register(url, schemaPath)
+	if err != nil {
+		stdlog.Fatalf("Events handler adding failed: %v\n", err)
+	}
+	h, err := handler.NewJSONHandler(url, sp, addEventsProcessor)
+	if err != nil {
+		stdlog.Fatalf("AddEventsHanlder registration error: %v\n", err)
+	}
+	stdlog.Printf("Events handler added\n")
+	return h
 }
