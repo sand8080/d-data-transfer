@@ -1,7 +1,10 @@
 package handler
 
 import (
+	"errors"
+	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/xeipuuv/gojsonschema"
@@ -9,9 +12,10 @@ import (
 	"github.com/sand8080/d-data-transfer/internal/validator"
 )
 
-type Processor func(data []byte) Response
+type Processor func(data []byte) *Response
 
 type JSONHandler struct {
+	url       string
 	schema    *gojsonschema.Schema
 	processor Processor
 }
@@ -21,7 +25,7 @@ func NewJSONHandler(url string, p *validator.SchemaProvider, proc Processor) (*J
 	if err != nil {
 		return nil, err
 	}
-	return &JSONHandler{s, proc}, nil
+	return &JSONHandler{url: url, schema: s, processor: proc}, nil
 }
 
 func (h JSONHandler) Handle(w http.ResponseWriter, r *http.Request) {
@@ -31,18 +35,24 @@ func (h JSONHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	dataLoader, reader := gojsonschema.NewReaderLoader(r.Body)
 	reqData, err := ioutil.ReadAll(reader)
 	if err != nil {
-		write(w, newError(http.StatusInternalServerError, err))
+		log.Printf("Request data loading error: %v\n", err)
+		write(w, NewErrorResponse(http.StatusInternalServerError, err))
 		return
 	}
 
 	// Request validation
 	valResult, err := h.schema.Validate(dataLoader)
 	if err != nil {
-		write(w, newError(http.StatusInternalServerError, err))
+		log.Printf("Request validation error: %v\n", err)
+		if err == io.EOF {
+			err = errors.New("empty request")
+		}
+		write(w, NewErrorResponse(http.StatusBadRequest, err))
 		return
 	}
 	if !valResult.Valid() {
-		write(w, newErrorFromValidationErrors(http.StatusBadRequest, valResult.Errors()))
+		log.Printf("Request invalid\n")
+		write(w, NewErrorResponseFromValidationErrors(http.StatusBadRequest, valResult.Errors()))
 		return
 	}
 
@@ -52,7 +62,7 @@ func (h JSONHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	// TODO implement response validation
 
 	// Writing response
-	write(w, &result)
+	write(w, result)
 	return
 }
 

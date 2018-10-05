@@ -4,6 +4,6 @@
   "properties": {
     "events": {"$ref": "../../../../model/v1/events.json#"}
   },
-  "required": ["users"],
+  "required": ["events"],
   "additionalProperties": false
 }

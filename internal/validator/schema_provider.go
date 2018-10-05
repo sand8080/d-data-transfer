@@ -37,13 +37,13 @@ func prepareUrl(url string) string {
 	return strings.ToLower(strings.Trim(url, "/"))
 }
 
-func (p *SchemaProvider) Register(url, filename string) error {
-	schema, err := loadSchema(filename)
+func (p *SchemaProvider) Register(url, filePath string) error {
+	schema, err := loadSchema(filePath)
 	if err != nil {
 		log.Printf("Schema loading error: %v\n", err)
 		return err
 	}
-
+	log.Printf("Schema loaded from %v\n", filePath)
 	p.validators[prepareUrl(url)] = schema
 	return nil
 }
